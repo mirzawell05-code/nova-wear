@@ -1,0 +1,8 @@
+import {NextResponse} from 'next/server';
+import {db} from '@/lib/db';
+import {isAuthorizedWrite} from '@/lib/auth';
+import {z} from 'zod';
+import {Prisma} from '@prisma/client';
+type C={params:Promise<{id:string}>};
+const schema=z.object({status:z.enum(['NEW','CONFIRMED','SHIPPED','DELIVERED','CANCELLED'])});
+export async function PATCH(req:Request,{params}:C){if(!await isAuthorizedWrite())return NextResponse.json({error:'Нет доступа'},{status:403});const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:'Недопустимый статус'},{status:400});try{const order=await db.$transaction(async tx=>{const original=await tx.order.findUniqueOrThrow({where:{id:(await params).id},include:{items:true}});if(original.status==='CANCELLED' && parsed.data.status!=='CANCELLED')throw Error('Отменённый заказ нельзя восстановить автоматически');if(original.status==='DELIVERED' && parsed.data.status==='CANCELLED')throw Error('Доставленный заказ нельзя отменить автоматически');if(parsed.data.status==='CANCELLED' && original.status!=='CANCELLED'){for(const item of original.items){if(item.variantId)await tx.productVariant.updateMany({where:{id:item.variantId},data:{stock:{increment:item.quantity}}});}}return tx.order.update({where:{id:original.id},data:{status:parsed.data.status}})},{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});return NextResponse.json(order)}catch(e){return NextResponse.json({error:e instanceof Error&&/^(Отменённый заказ|Доставленный заказ)/.test(e.message)?e.message:'Ошибка обновления заказа'},{status:409})}}

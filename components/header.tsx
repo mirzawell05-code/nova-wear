@@ -1,0 +1,25 @@
+'use client';
+import Link from 'next/link';
+import {Heart,Search,ShoppingBag,Menu,X,ArrowRight} from 'lucide-react';
+import {useShop} from './shop-provider';
+import {useEffect,useState} from 'react';
+import {usePathname,useRouter} from 'next/navigation';
+import type {CatalogProduct} from '@/lib/types';
+import Image from 'next/image';
+import {formatPrice} from '@/lib/utils';
+export default function Header(){
+ const {cart,favorites,setCartOpen}=useShop();const [mobile,setMobile]=useState(false),[search,setSearch]=useState(false),[term,setTerm]=useState(''),[results,setResults]=useState<CatalogProduct[]>([]);const router=useRouter();const pathname=usePathname();
+ useEffect(()=>{if(!search||term.trim().length<2){setResults([]);return;}const ctrl=new AbortController();const t=setTimeout(()=>fetch('/api/products?q='+encodeURIComponent(term),{signal:ctrl.signal}).then(r=>r.ok?r.json():[]).then(setResults).catch(()=>{}),220);return()=>{clearTimeout(t);ctrl.abort()}},[term,search]);
+ function submit(e:React.FormEvent){e.preventDefault();setSearch(false);router.push('/catalog?q='+encodeURIComponent(term.trim()));}
+ if(pathname.startsWith('/admin'))return null;
+ const links=[['Новинки','/catalog?sort=new'],['Женщинам','/catalog?gender=women'],['Мужчинам','/catalog?gender=men'],['Каталог','/catalog'],['Sale','/catalog?sale=true']];
+ return <><div className="bg-ink px-4 py-2 text-center text-[10px] font-medium tracking-[.11em] text-white sm:text-xs">БЕСПЛАТНАЯ ДОСТАВКА ПО КЫРГЫЗСТАНУ ОТ 5 000 СОМ</div>
+ <header className="sticky top-0 z-50 border-b border-black/5 bg-white/95 backdrop-blur-lg"><div className="mx-auto flex h-[72px] max-w-[1500px] items-center justify-between gap-5 px-5 sm:px-10 lg:h-[86px] lg:px-12">
+ <div className="flex items-center gap-5"><button className="lg:hidden" aria-label="Открыть меню" onClick={()=>setMobile(true)}><Menu size={23}/></button><Link href="/" className="whitespace-nowrap text-xl font-black tracking-[-.09em] sm:text-2xl">NOVA<span className="font-light tracking-[-.08em]">WEAR</span><span className="ml-0.5 inline-block h-1.5 w-1.5 rounded-full bg-ink"/></Link></div>
+ <nav className="hidden items-center gap-7 lg:flex">{links.map(([label,href])=><Link key={href} href={href} className="text-[11px] font-bold uppercase tracking-[.12em] transition-colors hover:text-stone">{label}</Link>)}</nav>
+ <div className="flex items-center gap-5 sm:gap-6"><button aria-label="Поиск" onClick={()=>setSearch(true)}><Search size={21} strokeWidth={1.6}/></button><Link href="/favorites" className="relative" aria-label="Избранное"><Heart size={21} strokeWidth={1.6}/>{favorites.length>0&&<span className="counter">{favorites.length}</span>}</Link><button onClick={()=>setCartOpen(true)} className="relative" aria-label="Открыть корзину"><ShoppingBag size={21} strokeWidth={1.6}/>{cart.length>0&&<span className="counter">{cart.reduce((s,i)=>s+i.quantity,0)}</span>}</button></div>
+ </div></header>
+ {mobile&&<div className="fixed inset-0 z-[80] bg-white"><div className="flex items-center justify-between border-b p-6"><strong className="text-xl tracking-tight">NOVA WEAR</strong><button onClick={()=>setMobile(false)} aria-label="Закрыть меню"><X/></button></div><nav className="flex flex-col px-6 py-8">{links.map(([label,href])=><Link onClick={()=>setMobile(false)} key={href} href={href} className="border-b py-5 text-2xl">{label}<ArrowRight className="float-right" size={21}/></Link>)}<Link onClick={()=>setMobile(false)} href="/delivery" className="py-6 text-sm text-stone">Доставка и возврат</Link></nav></div>}
+ {search&&<div className="fixed inset-0 z-[85] bg-black/40" onMouseDown={e=>{if(e.target===e.currentTarget)setSearch(false)}}><div className="mx-auto max-w-[850px] bg-white p-6 shadow-lg sm:mt-20 sm:p-10"><div className="mb-7 flex items-center justify-between"><h2 className="text-xl">Найти свой стиль</h2><button onClick={()=>setSearch(false)} aria-label="Закрыть поиск"><X/></button></div><form onSubmit={submit} className="flex gap-3 border-b border-ink pb-3"><Search/><input autoFocus type="search" value={term} onChange={e=>setTerm(e.target.value)} placeholder="Название или категория" className="w-full bg-transparent text-base outline-none"/><button aria-label="Искать" type="submit"><ArrowRight/></button></form>{results.length>0&&<div className="mt-6 max-h-80 space-y-3 overflow-auto">{results.map(p=><Link onClick={()=>setSearch(false)} href={`/product/${p.slug}`} key={p.id} className="flex items-center gap-4"><div className="relative h-16 w-12 flex-none bg-cream"><Image alt={p.name} src={p.images[0]?.url||'/placeholder.svg'} fill sizes="48px" className="object-cover"/></div><div className="flex-1 text-sm">{p.name}<p className="text-xs text-stone">{p.category.name}</p></div><span className="text-xs">{formatPrice(p.price)}</span></Link>)}</div>}<button onClick={()=>{setSearch(false);router.push('/catalog?q='+encodeURIComponent(term))}} className="mt-6 text-xs font-bold uppercase tracking-widest">Все результаты <ArrowRight className="inline" size={15}/></button></div></div>}
+ </>;
+}

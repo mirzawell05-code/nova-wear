@@ -1,0 +1,2 @@
+'use client';
+export default function ErrorPage({error,reset}:{error:Error&{digest?:string};reset:()=>void}){return <main className="container-nova grid min-h-[60vh] place-items-center py-20 text-center"><div><p className="eyebrow mb-5">NOVA WEAR</p><h1 className="mb-5 text-4xl tracking-editorial">Что-то пошло не так.</h1><p className="mb-8 max-w-md text-sm leading-7 text-stone">Не удалось загрузить страницу. Проверьте подключение и попробуйте снова.</p><button className="button-dark" onClick={reset}>Попробовать снова</button></div></main>}

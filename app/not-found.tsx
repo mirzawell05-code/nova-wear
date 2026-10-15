@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function NotFound(){return <main className="container-nova grid min-h-[65vh] place-items-center py-24 text-center"><div><p className="mb-4 text-8xl font-medium tracking-editorial">404</p><h1 className="mb-5 text-3xl tracking-editorial">Страница не найдена</h1><p className="mb-8 text-sm text-stone">Возможно, она переехала или больше не существует.</p><Link href="/catalog" className="button-dark">Вернуться в каталог</Link></div></main>}

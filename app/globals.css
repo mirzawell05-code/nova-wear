@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root{color-scheme:light}html{scroll-behavior:smooth}body{margin:0;color:#1D1D1B;background:white;-webkit-font-smoothing:antialiased}button,select,input,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed}::selection{background:#d2c2af;color:#191919}
+@layer components{
+ .container-nova{@apply mx-auto max-w-[1500px] px-5 sm:px-10 lg:px-12}
+ .eyebrow{@apply text-[10px] font-bold uppercase tracking-[.23em] text-stone}
+ .button-dark{@apply inline-flex items-center justify-center bg-ink px-7 py-[18px] text-xs font-bold uppercase tracking-[.14em] text-white transition-colors hover:bg-[#48443e] disabled:opacity-50}
+ .button-outline{@apply inline-flex items-center justify-center border border-ink px-7 py-[17px] text-xs font-bold uppercase tracking-[.14em] transition-colors hover:bg-ink hover:text-white}
+ .field{@apply w-full rounded-none border border-[#d8d6d0] bg-white px-4 py-3.5 text-sm outline-none transition focus:border-ink}
+ .field-label{@apply mb-2 block text-xs font-bold uppercase tracking-[.10em]}
+ .counter{@apply absolute -right-2 -top-2 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-ink px-0.5 text-[10px] text-white}
+ .footer-title{@apply mb-6 text-xs font-bold uppercase tracking-widest}
+ .footer-links{@apply flex flex-col items-start gap-3 text-sm text-white/60}
+}
+@keyframes slide-in{from{transform:translateX(100%)}to{transform:translateX(0)}}.animate-slide-in{animation:slide-in .35s cubic-bezier(.2,.7,.2,1)}
+input[type=range]{accent-color:#1d1d1b}a,button{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #987d5e;outline-offset:3px}
